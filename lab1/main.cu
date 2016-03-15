@@ -1,5 +1,3 @@
-//test2
-//tests
 #include <random>
 #include <vector>
 #include <tuple>
