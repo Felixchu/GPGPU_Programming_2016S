@@ -7,7 +7,21 @@
 #include <thrust/functional.h>
 #include <thrust/device_ptr.h>
 #include <thrust/execution_policy.h>
+#include <thrust/sequence.h>
+#include <thrust/copy.h> 
+#include <thrust/fill.h> 
+#include <thrust/replace.h>
+
 using namespace std;
+
+struct fun_trans{
+	__host__ __device__ int operator()( const int &x) const {
+		if(x==1)
+			return 1;
+		else
+			return 0;
+	}
+};
 
 __device__ __host__ int CeilDiv(int a, int b) { return (a-1)/b + 1; }
 __device__ __host__ int CeilAlign(int a, int b) { return CeilDiv(a, b) * b; }
@@ -92,23 +106,44 @@ void CountPosition(const char *text, int *pos, int text_size)
 	cudaMemcpy(offset_cu,offset,sizeof(int)*count,cudaMemcpyHostToDevice);
 	cudaMalloc(&buffer,sizeof(int)*text_size*2);
 	build << <Blockpergird, Threadperblock >> >(text,pos, buffer ,text_size,offset_cu);
-	cudaDeviceSynchronize();
+	
 	cudaFree(buffer);
 	cudaFree(offset_cu);
+	cudaDeviceSynchronize();
 }
+
+struct fun_2_trans {
+	__host__ __device__ bool operator()(const int x) const {
+		if (x==1)
+			return 1;
+		else
+			return 0;
+	}
+};
 
 int ExtractHead(const int *pos, int *head, int text_size)
 {
 	int *buffer;
-	int nhead;
-	cudaMalloc(&buffer, sizeof(int)*text_size*2); // this is enough
+	cudaMalloc(&buffer, sizeof(int)*text_size); // this is enough
 	thrust::device_ptr<const int> pos_d(pos);
-	thrust::device_ptr<int> head_d(head), flag_d(buffer), cumsum_d(buffer+text_size);
-
-	// TODO
-
+	thrust::device_ptr<int> head_d(head), flag_d(buffer);
+	thrust::sequence(flag_d,flag_d+text_size );
+	//thrust::transform(pos_d,pos_d+text_size,flag_d,fun_trans());
+	cudaDeviceSynchronize();
+	thrust::copy_if(flag_d,flag_d+text_size,pos_d,head_d,fun_2_trans());
+	cudaDeviceSynchronize();
+	int * head_pc=(int *)malloc(text_size*sizeof(int));
+	
+	cudaMemcpy(head_pc,head,sizeof(int)*text_size,cudaMemcpyDeviceToHost);
+	int i=0;
+	while(1){
+		i++;
+		if(head_pc[i]==0){
+			break;
+		}
+	}
 	cudaFree(buffer);
-	return nhead;
+	return i;
 }
 
 void Part3(char *text, int *pos, int *head, int text_size, int n_head)
