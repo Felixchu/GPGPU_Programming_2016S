@@ -485,7 +485,7 @@ void PoissonImageCloning(
 	cudaMemcpy(buf1_a, target_a, sizeof(float)*3*wt_a*ht_a, cudaMemcpyDeviceToDevice);
 	
 	// iterate
-	for (int i = 0; i <1000;i++){
+	for (int i = 0; i <313;i++){
 		PoissonImageCloningIteration<<<gdim_a, bdim_a>>>(fixed_a, mask_a, buf1_a, buf2_a, wt_a, ht_a);
 		PoissonImageCloningIteration<<<gdim_a, bdim_a>>>(fixed_a, mask_a, buf2_a, buf1_a, wt_a, ht_a);
 	}
@@ -504,7 +504,7 @@ void PoissonImageCloning(
 	cudaMemcpy(buf1_b, output_a, sizeof(float)*3*wt_b*ht_b, cudaMemcpyDeviceToDevice);
 	
 	// iterate
-	for (int i = 0; i <1000;i++){
+	for (int i = 0; i <150;i++){
 		PoissonImageCloningIteration<<<gdim_b, bdim_b>>>(fixed_b, mask_b, buf1_b, buf2_b, wt_b, ht_b);
 		PoissonImageCloningIteration<<<gdim_b, bdim_b>>>(fixed_b, mask_b, buf2_b, buf1_b, wt_b, ht_b);
 	}
@@ -525,7 +525,7 @@ void PoissonImageCloning(
 	cudaMemcpy(buf1_c, output_b, sizeof(float)*3*wt_c*ht_c, cudaMemcpyDeviceToDevice);
 	
 	// iterate
-	for (int i = 0; i <1000;i++){
+	for (int i = 0; i <300;i++){
 		PoissonImageCloningIteration<<<gdim_c, bdim_c>>>(fixed_c, mask_c, buf1_c, buf2_c, wt_c, ht_c);
 		PoissonImageCloningIteration<<<gdim_c, bdim_c>>>(fixed_c, mask_c, buf2_c, buf1_c, wt_c, ht_c);
 	}
@@ -535,7 +535,7 @@ void PoissonImageCloning(
 //=================================
 	cudaMemset(buf1,0,sizeof(float)*3*wt*ht);
 	cudaMemcpy(buf1, output_c, sizeof(float)*3*wt*ht, cudaMemcpyDeviceToDevice);
-	for (int i = 0; i <1000;i++){
+	for (int i = 0; i <600;i++){
 		PoissonImageCloningIteration<<<gdim, bdim>>>(fixed, mask, buf1, buf2, wt, ht);
 		PoissonImageCloningIteration<<<gdim, bdim>>>(fixed, mask, buf2, buf1, wt, ht);
 	}
